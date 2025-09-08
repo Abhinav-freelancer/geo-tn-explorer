@@ -86,24 +86,27 @@ const GISMap: React.FC<GISMapProps> = ({ selectedGeometry, onGeometrySelect }) =
         className="w-full h-full rounded-lg shadow-lg"
         ref={mapRef}
       >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        
-        <GeoJSON 
-          data={tamilNaduBoundary as any} 
-          style={boundaryStyle}
-        />
-        
-        {selectedGeometry && (
-          <GeoJSON 
-            data={selectedGeometry} 
-            style={selectedStyle}
+        <>
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-        )}
-        
-        <MapController selectedGeometry={selectedGeometry} />
+          
+          <GeoJSON 
+            data={tamilNaduBoundary as any} 
+            style={boundaryStyle}
+          />
+          
+          {selectedGeometry && (
+            <GeoJSON 
+              key="selected-geometry"
+              data={selectedGeometry} 
+              style={selectedStyle}
+            />
+          )}
+          
+          <MapController selectedGeometry={selectedGeometry} />
+        </>
       </MapContainer>
       
       {/* Map Legend */}
