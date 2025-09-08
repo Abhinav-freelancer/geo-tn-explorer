@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { MapContainer } from 'react-leaflet';
 import GISMap from '../components/GISMap';
 import SearchPanel from '../components/SearchPanel';
 import ResultsPanel from '../components/ResultsPanel';
@@ -134,11 +133,12 @@ const Index = () => {
           />
         </div>
 
-        {/* Overlay for mobile sidebar */}
+        {/* Overlay for mobile sidebar - only covers sidebar area */}
         {sidebarOpen && (
           <div
             className="fixed inset-0 bg-black/20 z-30 lg:hidden"
             onClick={() => setSidebarOpen(false)}
+            style={{ right: 'calc(100vw - 320px)' }}
           />
         )}
 
