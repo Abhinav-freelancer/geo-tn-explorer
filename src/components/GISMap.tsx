@@ -1,9 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import 'leaflet-draw/dist/leaflet.draw.css';
-import 'leaflet-draw';
 import { tamilNaduBoundary } from '../data/tamilNaduBoundary';
 
 // Fix for default markers
@@ -52,7 +50,6 @@ const GISMap: React.FC<GISMapProps> = ({ selectedGeometry, onGeometrySelect }) =
   };
 
   useEffect(() => {
-    // Simple click handler for basic interaction
     const handleMapClick = (e: L.LeafletMouseEvent) => {
       const clickedGeometry = {
         type: 'Feature',
@@ -81,35 +78,32 @@ const GISMap: React.FC<GISMapProps> = ({ selectedGeometry, onGeometrySelect }) =
   return (
     <div className="relative w-full h-full">
       <MapContainer
-        center={[11.1271, 78.6569]} // Tamil Nadu center
+        center={[11.1271, 78.6569]}
         zoom={7}
         className="w-full h-full rounded-lg shadow-lg"
         ref={mapRef}
       >
-        <>
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-          
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        
+        <GeoJSON 
+          data={tamilNaduBoundary as any} 
+          style={boundaryStyle}
+        />
+        
+        {selectedGeometry && (
           <GeoJSON 
-            data={tamilNaduBoundary as any} 
-            style={boundaryStyle}
+            key={JSON.stringify(selectedGeometry)}
+            data={selectedGeometry} 
+            style={selectedStyle}
           />
-          
-          {selectedGeometry && (
-            <GeoJSON 
-              key="selected-geometry"
-              data={selectedGeometry} 
-              style={selectedStyle}
-            />
-          )}
-          
-          <MapController selectedGeometry={selectedGeometry} />
-        </>
+        )}
+        
+        <MapController selectedGeometry={selectedGeometry} />
       </MapContainer>
       
-      {/* Map Legend */}
       <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-md z-[1000]">
         <h4 className="font-semibold text-sm mb-2 text-foreground">Legend</h4>
         <div className="space-y-1 text-xs">
