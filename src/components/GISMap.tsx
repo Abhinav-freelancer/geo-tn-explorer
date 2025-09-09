@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, GeoJSON, FeatureGroup, useMapEvents, useMap } from 'react-leaflet';
+import React, { useEffect } from 'react';
+import { MapContainer, TileLayer, GeoJSON, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import 'leaflet-draw/dist/leaflet.draw.css';
 import { tamilNaduBoundary } from '../data/tamilNaduBoundary';
 
 // Fix default markers in Leaflet
@@ -20,7 +19,7 @@ interface GISMapProps {
 
 // Component to handle map events
 function MapEvents({ onGeometrySelect }: { onGeometrySelect: (geometry: any) => void }) {
-  const map = useMapEvents({
+  useMapEvents({
     click: (e) => {
       const { lat, lng } = e.latlng;
       
@@ -47,10 +46,14 @@ function FitBounds() {
   
   useEffect(() => {
     if (map && tamilNaduBoundary) {
-      const geoJsonLayer = L.geoJSON(tamilNaduBoundary as any);
-      const bounds = geoJsonLayer.getBounds();
-      if (bounds.isValid()) {
-        map.fitBounds(bounds, { padding: [20, 20] });
+      try {
+        const geoJsonLayer = L.geoJSON(tamilNaduBoundary as any);
+        const bounds = geoJsonLayer.getBounds();
+        if (bounds.isValid()) {
+          map.fitBounds(bounds, { padding: [20, 20] });
+        }
+      } catch (error) {
+        console.error('Error fitting bounds:', error);
       }
     }
   }, [map]);
@@ -58,68 +61,12 @@ function FitBounds() {
   return null;
 }
 
-// Component for drawing controls
-function DrawingControls({ onGeometrySelect }: { onGeometrySelect: (geometry: any) => void }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (!map) return;
-
-    // Add drawing controls
-    const drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
-
-    const drawControl = new L.Control.Draw({
-      position: 'topright',
-      draw: {
-        polygon: {},
-        rectangle: {},
-        circle: false,
-        circlemarker: false,
-        marker: {},
-        polyline: false,
-      },
-      edit: {
-        featureGroup: drawnItems,
-        remove: false,
-      },
-    });
-
-    map.addControl(drawControl);
-
-    // Handle drawing events
-    map.on(L.Draw.Event.CREATED, (event: any) => {
-      const { layer } = event;
-      const geometry = layer.toGeoJSON();
-      
-      drawnItems.addLayer(layer);
-      
-      const mockGeometry = {
-        type: 'Feature',
-        geometry: geometry.geometry,
-        properties: {
-          name: `Drawn Area (${geometry.geometry.type})`
-        }
-      };
-      
-      onGeometrySelect(mockGeometry);
-    });
-
-    return () => {
-      map.removeControl(drawControl);
-      map.removeLayer(drawnItems);
-    };
-  }, [map, onGeometrySelect]);
-
-  return null;
-}
-
 const GISMap: React.FC<GISMapProps> = ({ selectedGeometry, onGeometrySelect }) => {
   const boundaryStyle = {
-    color: 'hsl(140 60% 35%)', // Using design system primary color
+    color: '#228B22', // Forest green
     weight: 2,
     opacity: 0.8,
-    fillColor: 'hsl(140 60% 35%)',
+    fillColor: '#228B22',
     fillOpacity: 0.1
   };
 
@@ -128,7 +75,7 @@ const GISMap: React.FC<GISMapProps> = ({ selectedGeometry, onGeometrySelect }) =
       <MapContainer
         style={{ height: "100%", width: "100%" }}
         zoom={7}
-        center={[11.1271, 78.6569]} // Tamil Nadu center
+        center={[11.1271, 78.6569]}
         className="z-0"
       >
         <TileLayer
@@ -136,40 +83,30 @@ const GISMap: React.FC<GISMapProps> = ({ selectedGeometry, onGeometrySelect }) =
           attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
         />
         
-        {/* Tamil Nadu Boundary */}
-        {tamilNaduBoundary && (
-          <GeoJSON 
-            data={tamilNaduBoundary as any} 
-            style={boundaryStyle}
-          />
-        )}
+        <GeoJSON 
+          data={tamilNaduBoundary as any} 
+          style={boundaryStyle}
+        />
         
-        {/* Map Event Handlers */}
         <MapEvents onGeometrySelect={onGeometrySelect} />
-        
-        {/* Fit map to boundary */}
         <FitBounds />
-        
-        {/* Drawing Controls */}
-        <DrawingControls onGeometrySelect={onGeometrySelect} />
       </MapContainer>
       
       <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-md z-[1000]">
-        <h4 className="font-semibold text-sm mb-2 text-foreground">Legend</h4>
+        <h4 className="font-semibold text-sm mb-2 text-foreground">Map Controls</h4>
         <div className="space-y-1 text-xs">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-2 bg-primary/20 border border-primary"></div>
+            <div className="w-4 h-2 bg-green-500/20 border border-green-500"></div>
             <span className="text-muted-foreground">Tamil Nadu</span>
           </div>
           {selectedGeometry && (
             <div className="flex items-center gap-2">
-              <div className="w-4 h-2 bg-map-selected/30 border border-map-selected"></div>
-              <span className="text-muted-foreground">Selected Area</span>
+              <div className="w-4 h-2 bg-orange-500/30 border border-orange-500"></div>
+              <span className="text-muted-foreground">Selected Location</span>
             </div>
           )}
-          <div className="flex items-center gap-2 mt-2">
-            <div className="w-4 h-2 bg-blue-500/30 border border-blue-500"></div>
-            <span className="text-muted-foreground">Draw Tools (Top Right)</span>
+          <div className="mt-2 text-muted-foreground">
+            Click anywhere on the map to select a location
           </div>
         </div>
       </div>
