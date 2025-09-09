@@ -133,14 +133,6 @@ const Index = () => {
           />
         </div>
 
-        {/* Overlay for mobile sidebar - only covers sidebar area */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/20 z-30 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-            style={{ right: 'calc(100vw - 320px)' }}
-          />
-        )}
 
         {/* Map Container */}
         <div className="flex-1 h-full">
